@@ -1,0 +1,11 @@
+akshare
+baostock
+pandas
+numpy
+matplotlib
+pyyaml
+ipython
+jupyter
+pyarrow
+scikit-learn
+lightgbm

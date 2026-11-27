@@ -1,0 +1,74 @@
+# Python cache
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*$py.class
+.ipynb_checkpoints/
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.p12
+*.pfx
+
+# Logs
+*.log
+logs/
+my_strategy/data/processed/**/*.log
+
+# Databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Local market data and generated strategy artifacts
+my_strategy/data/raw/
+my_strategy/data/processed/
+my_strategy/data/qlib_data/
+my_strategy/data/legacy_strategy_lab_cache/
+
+# Legacy root-level outputs
+results/charts/
+results/daily/
+results/trades/
+results/reports/
+results/scans/
+results/qbot_signals/
+
+# Model artifacts and checkpoints
+models/
+checkpoints/
+*.pkl
+*.pickle
+*.joblib
+*.pt
+*.pth
+*.onnx
+*.h5
+*.ckpt
+
+# Build outputs
+dist/
+build/
+*.egg-info/
+
+# Archives and large local bundles
+*.zip
+*.7z
+*.rar
+*.tar
+*.tar.gz
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Keep directory documentation and placeholders trackable
+!**/README.md
+!**/.gitkeep
+!**/.keep

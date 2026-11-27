@@ -1,0 +1,6 @@
+"""Shared schema constants."""
+
+RUN_METADATA_FILE = "metadata.json"
+AGENT_RESULT_VERSION = 1
+MODEL_REGISTRY_VERSION = 1
+LEDGER_VERSION = 1

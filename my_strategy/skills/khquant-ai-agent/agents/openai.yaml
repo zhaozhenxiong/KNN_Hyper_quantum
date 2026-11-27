@@ -1,0 +1,4 @@
+﻿interface:
+  display_name: "KHQuant AI Agent"
+  short_description: "Stabilize this local quant AI-Agent workflow."
+  default_prompt: "Use $khquant-ai-agent to run a local AI-Agent stock backtest with the project's fixed data and charting rules."

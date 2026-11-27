@@ -1,0 +1,148 @@
+{
+  "schema_version": 1,
+  "coverage": "Verified event intervals for six instruments. Coverage end dates bound the reviewed evidence. Other instruments have unknown historical risk-warning status unless their input includes a dated observed price limit.",
+  "rules": [
+    {
+      "board": "sh_main",
+      "effective_from": "2023-04-10",
+      "effective_through": "2026-07-05",
+      "available_at": "2023-02-17T23:59:59+08:00",
+      "risk_warning_limit": 0.05,
+      "source_url": "https://www.sse.com.cn/lawandrules/sselawsrules2025/repeal/rules/c/c_20250612_10824490.shtml"
+    },
+    {
+      "board": "sh_main",
+      "effective_from": "2026-07-06",
+      "effective_through": null,
+      "available_at": "2026-04-24T23:59:59+08:00",
+      "risk_warning_limit": 0.10,
+      "source_url": "https://star.sse.com.cn/aboutus/mediacenter/hotandd/c/c_20260424_10816474.shtml"
+    },
+    {
+      "board": "sz_main",
+      "effective_from": "2023-04-10",
+      "effective_through": "2026-07-05",
+      "available_at": "2023-03-06T23:59:59+08:00",
+      "risk_warning_limit": 0.05,
+      "source_url": "https://www.szse.cn/www/investor/knowledge/t20230306_599093.html"
+    },
+    {
+      "board": "sz_main",
+      "effective_from": "2026-07-06",
+      "effective_through": null,
+      "available_at": "2026-04-24T23:59:59+08:00",
+      "risk_warning_limit": 0.10,
+      "source_url": "https://www.szse.cn/lawrules/rule/trade/current/t20260424_620190.html"
+    }
+  ],
+  "events": [
+    {
+      "stock": "600070.SH",
+      "kind": "risk_warning",
+      "effective_from": "2024-04-30",
+      "effective_through": "2025-04-29",
+      "available_at": "2024-05-18T23:59:59+08:00",
+      "availability_basis": "issuer_publication_date_end",
+      "source_url": "https://static.cninfo.com.cn/finalpage/2024-05-18/1220091898.PDF"
+    },
+    {
+      "stock": "600070.SH",
+      "kind": "suspended",
+      "effective_from": "2025-04-11",
+      "effective_through": "2025-04-29",
+      "available_at": "2025-04-11T09:30:00+08:00",
+      "availability_basis": "official_exchange_session_status",
+      "source_url": "https://static.cninfo.com.cn/finalpage/2025-04-11/1223055921.PDF"
+    },
+    {
+      "stock": "600070.SH",
+      "kind": "delisted",
+      "effective_from": "2025-04-30",
+      "effective_through": null,
+      "available_at": "2025-04-29T23:59:59+08:00",
+      "availability_basis": "issuer_publication_date_end",
+      "source_url": "https://www.sse.com.cn/assortment/stock/list/info/company/index.shtml?COMPANY_CODE=600070&tabActive=1"
+    },
+    {
+      "stock": "603388.SH",
+      "kind": "risk_warning",
+      "effective_from": "2024-04-30",
+      "effective_through": "2025-05-05",
+      "available_at": "2025-03-01T23:59:59+08:00",
+      "availability_basis": "issuer_publication_date_end",
+      "source_url": "https://static.cninfo.com.cn/finalpage/2025-03-01/1222674531.PDF"
+    },
+    {
+      "stock": "603388.SH",
+      "kind": "risk_warning",
+      "effective_from": "2025-05-06",
+      "effective_through": "2025-12-04",
+      "available_at": "2025-04-30T23:59:59+08:00",
+      "availability_basis": "issuer_publication_date_end",
+      "source_url": "https://paper.cnstock.com/html/2025-04/30/content_2062854.htm"
+    },
+    {
+      "stock": "603388.SH",
+      "kind": "suspended",
+      "effective_from": "2025-04-30",
+      "effective_through": "2025-04-30",
+      "available_at": "2025-04-30T09:30:00+08:00",
+      "availability_basis": "official_exchange_session_status",
+      "source_url": "https://paper.cnstock.com/html/2025-04/30/content_2062854.htm"
+    },
+    {
+      "stock": "603388.SH",
+      "kind": "suspended",
+      "effective_from": "2025-11-11",
+      "effective_through": "2025-12-04",
+      "available_at": "2025-11-11T09:30:00+08:00",
+      "availability_basis": "official_exchange_session_status",
+      "source_url": "https://big5.sse.com.cn/site/cht/www.sse.com.cn/disclosure/listedinfo/announcement/c/new/2025-11-11/603388_20251111_YEA9.pdf"
+    },
+    {
+      "stock": "603388.SH",
+      "kind": "delisted",
+      "effective_from": "2025-12-05",
+      "effective_through": null,
+      "available_at": "2025-11-29T23:59:59+08:00",
+      "availability_basis": "issuer_publication_date_end",
+      "source_url": "https://big5.sse.com.cn/site/cht/www.sse.com.cn/disclosure/listedinfo/announcement/c/new/2025-11-29/603388_20251129_7S1C.pdf"
+    },
+    {
+      "stock": "600811.SH",
+      "kind": "risk_warning",
+      "effective_from": "2025-03-18",
+      "effective_through": "2025-04-29",
+      "available_at": "2025-03-17T23:59:59+08:00",
+      "availability_basis": "issuer_publication_date_end",
+      "source_url": "https://static.cninfo.com.cn/finalpage/2025-03-17/1222816222.PDF"
+    },
+    {
+      "stock": "600200.SH",
+      "kind": "risk_warning",
+      "effective_from": "2025-05-06",
+      "effective_through": "2025-09-02",
+      "available_at": "2025-04-30T23:59:59+08:00",
+      "availability_basis": "issuer_publication_date_end",
+      "source_url": "https://static.cninfo.com.cn/finalpage/2025-04-30/1223419400.PDF"
+    },
+    {
+      "stock": "002231.SZ",
+      "kind": "risk_warning",
+      "effective_from": "2025-04-30",
+      "effective_through": "2025-09-26",
+      "available_at": "2025-04-29T23:59:59+08:00",
+      "availability_basis": "issuer_publication_date_end",
+      "source_url": "https://static.cninfo.com.cn/finalpage/2025-04-29/1223382130.PDF"
+    },
+    {
+      "stock": "000691.SZ",
+      "kind": "risk_warning",
+      "effective_from": "2025-04-30",
+      "effective_through": "2026-05-31",
+      "available_at": "2025-04-29T23:59:59+08:00",
+      "availability_basis": "issuer_publication_date_end",
+      "source_url": "https://static.cninfo.com.cn/finalpage/2025-04-29/1223374979.PDF"
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+data_root: "D:/quant_strategy/my_strategy/data"
+
+cache:
+  format: "parquet"
+  overwrite_on_failure: false
+  min_rows_for_valid_stock: 100
+  allow_use_old_cache: true
+
+stock_pool:
+  default_mode: "custom"
+  custom_pool_path: "D:/quant_strategy/my_strategy/data/raw/custom_pool/my_pool.csv"
+  all_a_cache_path: "D:/quant_strategy/my_strategy/data/raw/stock_basic/all_a_stock_list.parquet"
+  all_a_min_count: 3000
+
+update:
+  start_date: "2015-01-01"
+  auto_incremental: true
+  update_after_hour: 16
+  max_retry: 3
+  sleep_seconds: 0.8
+
+data_sources:
+  primary: "tencent"
+  fallback:
+    - "akshare"
+    - "baostock"
+    - "local_csv"
+
+minute_data_sources:
+  primary: "akshare"
+  fallback:
+    - "baostock"
+
+minute:
+  default_period: "5"
+  output_root: "D:/quant_strategy/my_strategy/data/processed/intraday_backtest"
+
+indexes:
+  benchmark:
+    - "000300.SH"
+    - "000905.SH"
+    - "000001.SH"

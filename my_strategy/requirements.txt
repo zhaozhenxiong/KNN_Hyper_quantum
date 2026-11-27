@@ -1,0 +1,5 @@
+-r requirements-base.txt
+--extra-index-url https://download.pytorch.org/whl/cu130
+torch==2.13.0+cu130; sys_platform == "linux"
+torch==2.13.0+cu130; sys_platform == "win32"
+torch==2.13.0; sys_platform == "darwin"

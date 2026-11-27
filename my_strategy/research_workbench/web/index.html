@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>量化研究工作台 · KHQuant</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/sector.css">
+  <script src="/app.js" defer></script>
+  <script src="/expert.js" defer></script>
+  <script src="/lightweight-charts.js" defer></script>
+  <script src="/sector-chart.js" defer></script>
+  <script src="/strategy-backtest.js" defer></script>
+  <script src="/stock-research-chart.js" defer></script>
+  <script src="/stock-chart.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#workspace">跳到工作区</a>
+  <div class="layout">
+    <aside class="sidebar">
+      <a class="brand" href="#expert" aria-label="KHQuant 研究工作台">
+        <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span class="brand-name">KHQuant<small>量化研究工作台</small></span>
+      </a>
+      <nav class="navigation" aria-label="工作台导航">
+        <a href="#expert" data-page="expert"><span class="nav-icon icon-models" aria-hidden="true"></span>KNN＋多模态</a>
+        <a href="#backtest" data-page="backtest"><span class="nav-icon icon-tuning" aria-hidden="true"></span>策略回测</a>
+        <a href="#stock-chart" data-page="stock-chart"><span class="nav-icon icon-stock-chart" aria-hidden="true"></span>个股与策略</a>
+        <a href="#data" data-page="data"><span class="nav-icon icon-data" aria-hidden="true"></span>数据与分类</a>
+      </nav>
+      <div class="sidebar-footer">
+        <span class="footer-dot" aria-hidden="true"></span><div>A 股日频研究<small>本地数据与实验</small></div>
+      </div>
+    </aside>
+    <main class="workspace" id="workspace">
+      <header class="topbar">
+        <div class="market-status"><span class="status-dot" id="market-dot" aria-hidden="true"></span><span id="market-status">读取行情覆盖…</span></div>
+        <div class="run-picker">
+          <button class="button button-quiet" type="button" id="refresh" title="刷新当前模型和行情">刷新</button>
+        </div>
+      </header>
+      <div class="workspace-body">
+        <div id="notification" class="notification" role="status" hidden></div>
+        <section id="page-expert" class="page" aria-labelledby="expert-title">
+          <div class="page-head">
+            <h1 id="expert-title">KNN 60%＋多模态 40%</h1>
+            <p>以 GPU 在线 KNN 为主、多模态综合专家为辅，按同日横截面百分位形成混合决策分；多模态无效时由 KNN 兜底。</p>
+          </div>
+          <div class="panel current-model" id="expert-current-model" role="status">读取当前模型…</div>
+          <section class="panel expert-control" aria-labelledby="expert-run-title">
+            <div class="panel-head">
+              <h2 id="expert-run-title">启动试验</h2>
+            </div>
+            <form class="expert-form" id="expert-form">
+              <div class="expert-fields">
+                <label class="field">样本外开始日期<input type="date" name="start" required></label>
+                <label class="field">样本外结束日期<input type="date" name="end" required></label>
+                <div class="field"><label for="expert-pool-choice">股票池</label>
+                  <select id="expert-pool-choice" name="pool">
+                    <option value="full">全部合格股票（沪深主板、科创板）</option>
+                    <option value="frozen_120">原 120 股冻结样本</option>
+                    <option value="board">按板块抽样</option>
+                    <option value="manual">手选股票</option>
+                  </select>
+                </div>
+              </div>
+              <fieldset class="expert-pool" id="expert-board" hidden disabled>
+                <legend>抽样板块</legend>
+                <div class="expert-board-options">
+                  <label><input name="board" type="checkbox" value="sh_main" checked>沪市主板</label>
+                  <label><input name="board" type="checkbox" value="sz_main" checked>深市主板</label>
+                  <label><input name="board" type="checkbox" value="star" checked>科创板</label>
+                </div>
+                <label class="field">样本数量<input type="number" name="stock_cap" min="1" max="1000" step="1"></label>
+              </fieldset>
+              <label class="field" id="expert-manual" hidden>股票代码<textarea name="symbols" rows="3" spellcheck="false" placeholder="例如 002436.SZ、002650.SZ，以空格或逗号分隔" disabled></textarea></label>
+              <div class="expert-fields expert-cost-fields">
+                <label class="field">佣金（万分之）<input type="number" name="commission_bps" inputmode="decimal" min="0" max="9999.99999999" step="any" required aria-describedby="expert-fee-hint"></label>
+                <p class="field-help" id="expert-fee-hint"></p>
+              </div>
+              <label class="field"><input type="checkbox" name="sector_view" value="true">保留板块明细与行业约束（板块特征不参与 KNN 训练）</label>
+              <details class="form-options">
+                <summary>高级设置</summary>
+                <div class="expert-fields">
+                  <label class="field">随机种子<input type="number" name="seed" min="0" max="2147483647" step="1" required></label>
+                  <label class="field">调仓间隔（交易日）<input type="number" name="rebalance_days" min="1" max="30" step="1" required></label>
+                  <label class="field">候选数量<input type="number" name="top_n" min="1" max="100" step="1" required></label>
+                  <label class="field">单股上限（%）<input type="number" name="max_weight" min="1" max="100" step="any" required></label>
+                  <label class="field">行业上限（%）<input type="number" name="max_industry_weight" min="1" max="100" step="any" required></label>
+                  <label class="field">KNN 计算设备
+                    <select name="knn_device">
+                      <option value="cuda">CUDA（指定，失败即报错）</option>
+                      <option value="auto">自动（不可用时明确回退 CPU）</option>
+                      <option value="cpu">CPU</option>
+                    </select>
+                  </label>
+                  <label class="field">GPU 查询分块<input type="number" name="knn_query_chunk" min="1" max="4096" step="1" required></label>
+                </div>
+              </details>
+              <div class="expert-form-actions">
+                <button class="button button-primary" type="submit" id="expert-run" disabled>启动混合训练</button>
+                <button class="button button-quiet" type="button" id="expert-preview" disabled>预览口径</button>
+              </div>
+            </form>
+            <div id="expert-setup" class="expert-setup" aria-label="研究口径" aria-live="polite"></div>
+            <p id="expert-status" class="expert-status" role="status">读取专家工作台…</p>
+          </section>
+          <div id="expert-result" class="stack" aria-live="polite"></div>
+        </section>
+        <section id="page-data" class="page" aria-labelledby="data-title" hidden>
+          <div class="page-head">
+            <h1 id="data-title">数据与分类</h1>
+            <p>核对行情覆盖、分类资料和历史股票池。</p>
+          </div>
+          <div class="overview-grid">
+            <div class="stack">
+              <section class="panel" aria-labelledby="coverage-title">
+                <div class="panel-head"><h2 id="coverage-title">日线覆盖</h2></div>
+                <dl class="coverage" id="coverage" aria-live="polite"></dl>
+                <div id="data-detail" class="panel-inset"></div>
+              </section>
+              <div id="universe-content" class="stack" hidden></div>
+              <section class="panel" aria-labelledby="classification-title">
+                <div class="panel-head"><h2 id="classification-title">时点分类</h2><span class="pill">静态特征</span></div>
+                <div id="classification-detail" class="panel-inset"></div>
+              </section>
+            </div>
+            <div class="stack">
+              <section class="panel" aria-labelledby="data-update-title">
+                <div class="panel-head"><h2 id="data-update-title">数据更新</h2><span class="pill" id="data-update-state">未开始</span></div>
+                <div class="panel-inset">
+                  <p>按已验证日历更新原始仓已有全部股票的最近完整收盘日线，不采用盘中实时价格。</p>
+                  <dl class="metrics" id="data-update-metrics"></dl>
+                  <button class="button button-primary" type="button" id="update-data" disabled>更新数据</button>
+                  <p id="data-update-status" role="status" aria-live="polite">正在读取更新状态…</p>
+                  <div id="data-update-result"></div>
+                  <p class="strategy-note">原始行情更新不会扩展 2026-11-20 冻结研究快照，也不会自动训练、回测、生成候选或更新模型。</p>
+                </div>
+              </section>
+              <section class="panel" aria-labelledby="data-study-title">
+                <div class="panel-head"><h2 id="data-study-title">KNN＋多模态研究</h2></div>
+                <div class="panel-inset"><a class="button button-quiet" href="#expert">设置股票池与启动试验</a></div>
+              </section>
+            </div>
+          </div>
+        </section>
+        <section id="page-backtest" class="page" aria-labelledby="strategy-title" hidden>
+          <div class="page-head">
+            <h1 id="strategy-title">策略回测</h1>
+            <p>用当前模型比较全池、关注股和沪深 300 的扣费表现。</p>
+          </div>
+          <div class="panel current-model" id="strategy-model" role="status">读取当前模型…</div>
+          <form class="panel strategy-config" id="strategy-form">
+            <div class="strategy-settings">
+              <fieldset class="strategy-watchlist">
+                <legend>关注股</legend>
+                <div class="strategy-search">
+                  <label for="strategy-symbol">搜索股票</label>
+                  <input id="strategy-symbol" type="search" placeholder="代码或名称" autocomplete="off" spellcheck="false"
+                         role="combobox" aria-autocomplete="list" aria-controls="strategy-suggestions" aria-expanded="false">
+                  <ul id="strategy-suggestions" class="strategy-suggestions" role="listbox" aria-label="匹配股票" hidden></ul>
+                </div>
+                <p id="strategy-watch-status" class="strategy-note" role="status">空名单时运行全池。</p>
+                <ul id="strategy-watchlist" class="strategy-chips" aria-label="已选关注股" hidden></ul>
+                <div class="strategy-watch-actions">
+                  <details id="strategy-paste">
+                    <summary>批量粘贴代码</summary>
+                    <label class="field" for="strategy-bulk">以空格、换行或逗号分隔</label>
+                    <textarea id="strategy-bulk" rows="2" placeholder="002436.SZ  002650.SZ" spellcheck="false"></textarea>
+                    <button id="strategy-bulk-add" class="button button-quiet" type="button">加入关注股</button>
+                  </details>
+                  <button id="strategy-clear" class="button button-quiet" type="button" disabled>清空</button>
+                </div>
+              </fieldset>
+              <fieldset class="strategy-dates">
+                <legend>回测区间与成本</legend>
+                <div class="strategy-fields">
+                  <label class="field">开始日期<input name="start" type="date" required></label>
+                  <label class="field">结束日期<input name="end" type="date" required></label>
+                  <label class="field">成本档位<select name="cost"><option value="normal">常规成本</option><option value="double">双倍佣金与滑点</option></select></label>
+                </div>
+                <details class="strategy-advanced">
+                  <summary>初始资金、佣金与滑点</summary>
+                  <div class="strategy-fields">
+                    <label class="field">初始资金（元）<input name="initial_cash" type="number" min="0" max="1000000000000" step="any" inputmode="decimal"></label>
+                    <label class="field">佣金（万分之）<input name="commission_bps" type="number" min="0" step="any" inputmode="decimal"></label>
+                    <label class="field">滑点（万分之）<input name="slippage_bps" type="number" min="0" step="any" inputmode="decimal"></label>
+                  </div>
+                  <p class="strategy-note">留空使用该版本的默认值。双倍档位加倍佣金、最低佣金和滑点。</p>
+                </details>
+              </fieldset>
+            </div>
+            <div class="strategy-submit">
+              <button class="button button-primary" type="submit" id="strategy-run" disabled>运行回测</button>
+              <p id="strategy-status" class="strategy-note" role="status">读取当前模型…</p>
+            </div>
+          </form>
+          <section class="panel strategy-performance" aria-labelledby="strategy-equity-title">
+            <div class="panel-head"><h2 id="strategy-equity-title">策略净值</h2><span class="strategy-note">初始净值 1</span></div>
+            <div id="strategy-chart-empty" class="empty" role="status">运行后查看同一交易日的扣费净值。</div>
+            <div id="strategy-chart-stage" hidden>
+              <div id="strategy-equity" aria-label="全池、关注股与基准净值对照图"></div>
+              <div class="strategy-date-controls">
+                <label class="strategy-date-scrubber" for="strategy-scrub">查看交易日<input id="strategy-scrub" type="range" min="0" max="0" value="0"></label>
+                <button id="strategy-show-month" class="button button-quiet" type="button" hidden>查看该月订单</button>
+              </div>
+              <div id="strategy-readout" class="strategy-readout"></div>
+              <p class="strategy-attribution"><a href="https://www.tradingview.com/" target="_blank" rel="noopener noreferrer">TradingView Lightweight Charts™</a> Copyright (c) 2023 TradingView, Inc.</p>
+            </div>
+          </section>
+          <section class="panel strategy-sectors" id="strategy-sectors" aria-labelledby="strategy-sectors-title" hidden>
+            <div class="panel-head">
+              <div><h2 id="strategy-sectors-title">板块行情与共振</h2><p id="sector-source-note" class="strategy-note">按归档标识显示板块来源 · 候选与实际目标分层</p></div>
+              <button class="button button-quiet" type="button" id="sector-theme" aria-pressed="false">切换暗色</button>
+            </div>
+            <div class="sector-controls">
+              <label class="field" for="sector-date">信号日期<input id="sector-date" type="date"></label>
+              <label class="field" for="sector-sort">行业排序<select id="sector-sort"><option value="trend">市场趋势分</option><option value="candidates">购买候选数</option></select></label>
+            </div>
+            <p id="sector-status" class="strategy-note" role="status" aria-live="polite">运行全市场回测后读取板块账本。</p>
+            <div id="sector-summary" class="panel-inset"></div>
+            <div id="sector-downloads" class="strategy-downloads"></div>
+            <div id="sector-overview"></div>
+            <div id="sector-detail" class="sector-detail"></div>
+          </section>
+          <section class="panel strategy-holdings" id="strategy-holdings" aria-labelledby="strategy-holdings-title" hidden>
+            <div class="panel-head"><h2 id="strategy-holdings-title">期末持仓收益</h2><span class="pill" id="strategy-holdings-state">历史研究</span></div>
+            <div class="panel-inset">
+              <label class="field" for="strategy-holdings-account">账户<select id="strategy-holdings-account"></select></label>
+              <p id="strategy-holdings-notice" class="strategy-note">历史模拟持仓与收益，不构成当前投资建议。</p>
+            </div>
+            <div id="strategy-holdings-summary" class="panel-inset strategy-holdings-summary"></div>
+            <div id="strategy-holdings-rows"></div>
+            <div id="strategy-holdings-advice" class="panel-inset strategy-holdings-advice"></div>
+            <p id="strategy-holdings-status" class="strategy-note" role="status"></p>
+            <div id="strategy-holdings-downloads" class="strategy-downloads"></div>
+          </section>
+          <section class="panel strategy-activity" id="strategy-activity" aria-labelledby="strategy-activity-title" hidden>
+            <div class="panel-head"><h2 id="strategy-activity-title">回测活跃度与订单</h2></div>
+            <div id="strategy-activity-summary" class="panel-inset strategy-activity-summary"></div>
+            <div id="strategy-activity-diagnosis" class="panel-inset strategy-activity-diagnosis" hidden></div>
+            <details id="strategy-month-details" class="panel-inset strategy-activity-months" open>
+              <summary>月度活跃度</summary>
+              <p id="strategy-activity-evidence" class="strategy-note"></p>
+              <div id="strategy-activity-months"></div>
+            </details>
+            <form id="strategy-activity-form" class="strategy-activity-filters">
+              <label class="field">账户<select name="account"></select></label>
+              <label class="field">月份<select name="month"><option value="">所有月份</option></select></label>
+              <label class="field">股票代码<input name="symbol" type="search" placeholder="如 600070.SH" maxlength="9"></label>
+              <label class="field">方向<select name="side"><option value="all">全部方向</option><option value="BUY">买入</option><option value="SELL">卖出</option></select></label>
+              <label class="field">状态<select name="status">
+                <option value="all">所有状态</option><option value="filled">成交</option><option value="partial">部分成交</option>
+                <option value="rejected">拒单</option><option value="pretrade_rejected">下单前拦截</option>
+              </select></label>
+              <button type="submit" class="button button-quiet">筛选订单</button>
+            </form>
+            <p id="strategy-activity-status" class="strategy-note strategy-activity-status" role="status"></p>
+            <div id="strategy-activity-rows"></div>
+            <div id="strategy-activity-pager" class="strategy-activity-pager" hidden>
+              <button type="button" class="button button-quiet" data-activity-page="prev">上一页</button>
+              <span id="strategy-activity-pages"></span>
+              <button type="button" class="button button-quiet" data-activity-page="next">下一页</button>
+            </div>
+          </section>
+          <div class="stack" id="strategy-result" aria-live="polite"></div>
+        </section>
+        <section id="page-stock-chart" class="page" aria-labelledby="stock-chart-title" hidden>
+          <div class="page-head">
+            <h1 id="stock-chart-title">个股与策略</h1>
+            <p>在原始日线定位策略信号，逐条核对回测成交和拒单。</p>
+          </div>
+          <div id="stock-chart-error" class="notification error" role="status" hidden></div>
+          <section class="panel stock-chart-controls" aria-label="选择股票和回测窗口">
+            <form id="stock-chart-form" autocomplete="off">
+              <div class="stock-chart-selectors">
+                <div class="stock-chart-search">
+                  <label for="stock-chart-symbol" class="field">股票代码或名称</label>
+                  <input id="stock-chart-symbol" type="search" role="combobox" aria-autocomplete="list" aria-controls="stock-chart-suggestions" aria-expanded="false" spellcheck="false" placeholder="如 002650.SZ">
+                  <ul id="stock-chart-suggestions" class="stock-chart-suggestions" aria-label="匹配股票" role="listbox" hidden></ul>
+                  <p class="stock-chart-search-info" id="stock-chart-search-info" role="status" hidden></p>
+                </div>
+                <label class="field" for="stock-chart-cost">成本口径<select id="stock-chart-cost"><option value="normal">常规成本</option><option value="double">双倍佣金与滑点</option></select></label>
+              </div>
+              <div class="stock-chart-range">
+                <label class="field" for="stock-chart-start">开始日期<input id="stock-chart-start" type="date" required disabled></label>
+                <label class="field" for="stock-chart-end">结束日期<input id="stock-chart-end" type="date" required disabled></label>
+                <button class="button button-quiet" type="submit" id="stock-chart-apply" disabled>查看区间</button>
+              </div>
+              <details class="strategy-advanced">
+                <summary>初始资金、佣金与滑点</summary>
+                <div class="strategy-fields">
+                  <label class="field">初始资金（元）<input id="stock-chart-initial-cash" type="number" min="0" max="1000000000000" step="any" inputmode="decimal"></label>
+                  <label class="field">佣金（万分之）<input id="stock-chart-commission" type="number" min="0" step="any" inputmode="decimal"></label>
+                  <label class="field">滑点（万分之）<input id="stock-chart-slippage" type="number" min="0" step="any" inputmode="decimal"></label>
+                </div>
+              </details>
+              <div id="stock-chart-current-model" class="stock-chart-model" role="status"></div>
+              <label><input type="checkbox" id="stock-chart-overlay"> 叠加全池组合动作</label>
+            </form>
+          </section>
+          <section id="stock-chart-latest" class="panel stock-chart-latest" aria-live="polite" hidden></section>
+          <section id="stock-chart-rank" class="panel stock-chart-rank" hidden></section>
+          <div class="stock-chart-spread">
+            <section class="panel stock-chart-panel" aria-labelledby="stock-chart-name" id="stock-chart-stage-workspace">
+              <div class="panel-head stock-chart-panel-head">
+                <div><h2 id="stock-chart-name">日线图</h2><p id="stock-chart-description"></p></div>
+                <button class="button button-quiet" type="button" id="stock-chart-fit" disabled>查看全区间</button>
+              </div>
+              <div id="stock-research-quality" class="stock-research-quality not_executed" role="status"></div>
+              <div class="stock-research-toolbar">
+                <div class="stock-research-presets" aria-label="K线周期">
+                  <button type="button" data-stock-frequency="日线" aria-pressed="true">日线</button>
+                  <button type="button" data-stock-frequency="周线" aria-pressed="false">周线</button>
+                  <button type="button" data-stock-frequency="月线" aria-pressed="false">月线</button>
+                </div>
+                <span id="stock-research-range-label" class="code"></span>
+                <div class="stock-research-presets" aria-label="时间窗口">
+                  <button type="button" data-stock-window="all" class="active">适应范围</button>
+                  <button type="button" data-stock-window="40">40根</button>
+                  <button type="button" data-stock-window="20">20根＋预测</button>
+                  <button type="button" id="stock-research-fullscreen">全屏</button>
+                </div>
+              </div>
+              <div class="stock-research-layers" aria-label="研究图层">
+                <label><input type="checkbox" data-research-layer="structure" checked>笔</label>
+                <label><input type="checkbox" data-research-layer="zones" checked>中枢</label>
+                <label><input type="checkbox" data-research-layer="fractals">分型</label>
+                <label><input type="checkbox" data-research-layer="sources" checked>来源 B/S</label>
+                <label><input type="checkbox" data-research-layer="wyckoff" checked>威科夫</label>
+                <label><input type="checkbox" data-research-layer="divergences">背驰</label>
+                <label><input type="checkbox" data-research-layer="ict" checked>ICT / FVG</label>
+                <label><input type="checkbox" data-research-layer="prediction" checked>预测中位数</label>
+                <label><input type="checkbox" data-research-layer="band" checked>P10–P90</label>
+                <label><input type="checkbox" data-research-layer="samples">有效样本路径</label>
+                <label><input type="checkbox" data-research-layer="volume" checked>成交量</label>
+                <label><input type="checkbox" data-research-layer="ma">MA5 / 10 / 20 / 60</label>
+                <label><input type="checkbox" data-research-layer="boll">BOLL</label>
+                <label><input type="checkbox" data-research-layer="chips">70%筹码估算</label>
+              </div>
+              <div class="stock-research-structure-legend">
+                <span><i></i>确认笔</span><span><i class="pending"></i>形成中笔</span><span><i class="zone"></i>中枢 · 红涨绿跌</span><span><i class="fvg"></i>严格 FVG · 非买卖确认</span>
+                <span id="stock-research-period-note">真实历史与冻结情景共用时间轴</span>
+              </div>
+              <dl class="stock-chart-readout" id="stock-chart-readout" aria-label="当前交易日或预测明细"></dl>
+              <div id="stock-research-indicator-readout" class="stock-research-indicator-readout"></div>
+              <p class="stock-chart-calculation" id="stock-chart-calculation" role="status" hidden></p>
+              <div id="stock-chart-empty" class="stock-chart-empty" role="status">正在读取本地行情…</div>
+              <div class="stock-chart-stage" id="stock-chart-stage" hidden>
+                <div class="stock-research-chart-row">
+                  <div id="stock-chart-price" aria-label="真实日 K 线、结构、成交量与冻结预测图"></div>
+                  <aside id="stock-research-chip-profile" class="stock-research-chip-profile" hidden></aside>
+                </div>
+                <div id="stock-chart-markers" class="stock-chart-markers" aria-label="图上真实回测事件"></div>
+              </div>
+              <div class="stock-research-selection" id="stock-research-selection" hidden><span id="stock-research-selection-caption"></span><button type="button" id="stock-research-reset-selection">取消固定</button></div>
+              <div class="stock-research-timeline"><span id="stock-research-visible-range"></span><input type="range" id="stock-research-pan" aria-label="平移时间窗口" min="0" value="0" step="1"><span>滚轮缩放 · 拖动平移 · 点击固定 · Esc取消</span></div>
+              <div class="stock-chart-foot">
+                <div class="stock-chart-legend" aria-label="图表事件图例">
+                  <span class="stock-chart-side-buy"><i class="stock-chart-glyph fill" aria-hidden="true"></i>买入</span>
+                  <span class="stock-chart-side-sell"><i class="stock-chart-glyph fill" aria-hidden="true"></i>卖出／减仓</span>
+                  <span><i class="stock-chart-glyph signal" aria-hidden="true"></i>盘后信号</span>
+                  <span><i class="stock-chart-glyph fill" aria-hidden="true"></i>模拟成交</span>
+                  <span><i class="stock-chart-glyph partial" aria-hidden="true"></i>部分成交</span>
+                  <span><i class="stock-chart-glyph rejected" aria-hidden="true"></i>拒单</span>
+                  <span id="stock-research-scenario-note"></span>
+                </div>
+                <div class="stock-chart-attribution"><span>连续图适配自 KCPredict · MIT</span><span>结构参考非买卖确认 · 参考结果不代表实际成交</span></div>
+              </div>
+            </section>
+            <div class="stack stock-chart-evidence">
+              <section class="panel" aria-labelledby="stock-chart-evidence-title">
+                <div class="panel-head"><h2 id="stock-chart-evidence-title">区间证据</h2></div>
+                <div class="stock-chart-coverage" id="stock-chart-coverage" role="status">等待行情和回测账本。</div>
+              </section>
+              <section class="panel" aria-labelledby="stock-chart-events-title">
+                <div class="panel-head"><h2 id="stock-chart-events-title">图上事件</h2><span id="stock-chart-event-day" class="code"></span></div>
+                <div class="stock-chart-event-detail" id="stock-chart-events">选择图上标记或账本行，查看对应记录。</div>
+              </section>
+              <section class="panel stock-research-methods" aria-labelledby="stock-research-methods-title">
+                <div class="panel-head"><h2 id="stock-research-methods-title">研究依据</h2><span>各方法独立派生</span></div>
+                <div id="stock-research-summary"></div>
+              </section>
+            </div>
+          </div>
+          <section class="panel stock-research-details" aria-labelledby="stock-research-details-title">
+            <div class="panel-head stock-research-details-head">
+              <h2 id="stock-research-details-title">历史结构、未来明细与审计</h2>
+              <button type="button" class="button button-quiet" id="stock-research-export">导出图表证据</button>
+            </div>
+            <div class="stock-research-tabs" role="tablist" aria-label="研究详情">
+              <button type="button" class="active" role="tab" aria-selected="true" data-research-tab="stock-research-history-panel">历史结构与确认时间</button>
+              <button type="button" role="tab" aria-selected="false" data-research-tab="stock-research-forecast-panel">未来逐日明细</button>
+              <button type="button" role="tab" aria-selected="false" data-research-tab="stock-research-audit-panel">数据与质量</button>
+            </div>
+            <div class="stock-research-tabcontent" id="stock-research-history-panel" role="tabpanel"><p class="stock-research-note">锚点与确认时钟分开；形成中结构会变化。下表是本次截止日的回溯派生结果。</p><div class="table-scroll" id="stock-research-history-table"></div></div>
+            <div class="stock-research-tabcontent" id="stock-research-forecast-panel" role="tabpanel" hidden><div class="table-scroll" id="stock-research-forecast-table"></div><p class="stock-research-note">P10–P90 是有效采样的收盘价分位区间；上涨样本比例不等于校准概率、历史胜率或收益认证。</p></div>
+            <div class="stock-research-tabcontent" id="stock-research-audit-panel" role="tabpanel" hidden><pre id="stock-research-audit"></pre></div>
+          </section>
+          <section class="panel stock-research-sources" aria-labelledby="stock-research-sources-title">
+            <div class="panel-head"><h2 id="stock-research-sources-title">来源事件与量价特征</h2><select id="stock-research-event-family" aria-label="事件来源"><option value="">全部来源</option><option value="structure">结构</option><option value="wyckoff">威科夫</option><option value="ict">ICT</option></select></div>
+            <div id="stock-research-source-events" class="stock-research-source-events"></div>
+            <p class="stock-research-disclaimer">筹码为历史 HLC/3 成交量加权分布估算，非真实持仓筹码。结构、来源 B/S、威科夫和 ICT 均为研究参考，不是买卖确认，也不代表实际成交。</p>
+          </section>
+          <section class="panel stock-chart-ledger" aria-labelledby="stock-chart-ledger-title" id="stock-chart-ledger">
+            <div class="panel-head stock-chart-ledger-head">
+              <h2 id="stock-chart-ledger-title">信号与成交账本</h2>
+              <div class="stock-chart-stage-filters" aria-label="筛选账本事件">
+                <button class="button button-quiet" type="button" data-stock-stage="all" aria-pressed="true">全部</button>
+                <button class="button button-quiet" type="button" data-stock-stage="signal" aria-pressed="false">信号</button>
+                <button class="button button-quiet" type="button" data-stock-stage="fill" aria-pressed="false">成交</button>
+                <button class="button button-quiet" type="button" data-stock-stage="rejected" aria-pressed="false">拒单</button>
+              </div>
+            </div>
+            <div class="table-scroll" id="stock-chart-ledger-rows"></div>
+          </section>
+        </section>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

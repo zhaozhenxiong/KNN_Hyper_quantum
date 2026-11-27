@@ -1,0 +1,35 @@
+strategy_name: KHQuant-Intraday-V1
+
+data:
+  source: local_minute_data_center
+  period: "5"
+  start: "2026-07-01"
+  end: "2026-07-07"
+  auto_update: true
+  stocks:
+    - 002436.SZ
+
+intraday_strategy:
+  fast_ma: 6
+  slow_ma: 24
+  rsi_window: 14
+  volume_window: 20
+  buy_threshold: 0.35
+  exit_threshold: 0.05
+  min_entry_weight: 0.30
+  max_weight: 0.80
+
+risk:
+  stop_loss: 0.04
+  take_profit: 0.12
+
+backtest:
+  initial_cash: 500000
+  commission: 0.0003
+  stamp_tax: 0.0005
+  slippage: 0.0005
+  lot_size: 1
+  min_weight_change: 0.05
+
+outputs:
+  root_dir: my_strategy/data/processed/intraday_backtest
